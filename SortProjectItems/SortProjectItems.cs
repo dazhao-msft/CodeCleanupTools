@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -27,6 +28,8 @@ public static class Program
 
         foreach (var file in files)
         {
+            SortPropertyGroups(file);
+
             SortProjectItems(file);
         }
 
@@ -37,6 +40,48 @@ public static class Program
     {
         Console.WriteLine(@"Usage: SortProjectItems.exe [<path-to-root-directory-of-csproj-files>]
        Sorts the ItemGroup contents of an MSBuild project file alphabetically.");
+    }
+
+    private static void SortPropertyGroups(string filePath)
+    {
+        XDocument document = XDocument.Load(filePath, LoadOptions.PreserveWhitespace | LoadOptions.SetLineInfo);
+        XNamespace msBuildNamespace = document.Root.GetDefaultNamespace();
+        XName propertyGroupName = XName.Get("PropertyGroup", msBuildNamespace.NamespaceName);
+
+        var propertyGroups = document.Root.Elements(propertyGroupName).ToArray();
+
+        foreach (XElement propertyGroup in propertyGroups)
+        {
+            SortPropertyGroup(propertyGroup);
+        }
+
+        var originalBytes = File.ReadAllBytes(filePath);
+        byte[] newBytes = null;
+
+        using (var memoryStream = new MemoryStream())
+        using (var textWriter = new StreamWriter(memoryStream, Encoding.UTF8))
+        {
+            document.Save(textWriter, SaveOptions.None);
+            newBytes = memoryStream.ToArray();
+        }
+
+        if (!AreEqual(originalBytes, newBytes))
+        {
+            File.WriteAllBytes(filePath, newBytes);
+        }
+    }
+
+    private static void SortPropertyGroup(XElement propertyGroup)
+    {
+        var original = propertyGroup.Elements().ToArray();
+        var sorted = original
+            .OrderBy(i => i.Name.LocalName, SpecialPropertyNameComparer.Default)
+            .ToArray();
+
+        for (int i = 0; i < original.Length; i++)
+        {
+            original[i].ReplaceWith(sorted[i]);
+        }
     }
 
     private static void SortProjectItems(string filePath)
@@ -223,6 +268,56 @@ public static class Program
         for (int i = 0; i < original.Length; i++)
         {
             original[i].ReplaceWith(sorted[i]);
+        }
+    }
+
+    private class SpecialPropertyNameComparer : StringComparer
+    {
+        public static readonly SpecialPropertyNameComparer Default = new SpecialPropertyNameComparer();
+
+        private static readonly Dictionary<string, int> SpecialPropertyNames = new Dictionary<string, int>()
+        {
+            { "TargetFramework", 0 },
+            { "RuntimeIdentifier", 1 },
+            { "OutputType", 2 },
+            { "AssemblyName", 3 },
+            { "RootNamespace", 4 },
+            { "IsPackable", 5 },
+            { "IsTestProject", 6 },
+        };
+
+
+        public override int Compare(string x, string y)
+        {
+            bool isXSpecial = SpecialPropertyNames.ContainsKey(x);
+            bool isYSpecial = SpecialPropertyNames.ContainsKey(y);
+
+            if (isXSpecial && isYSpecial)
+            {
+                return SpecialPropertyNames[x] - SpecialPropertyNames[y];
+            }
+            else if (isXSpecial)
+            {
+                return -1;
+            }
+            else if (isYSpecial)
+            {
+                return 1;
+            }
+            else
+            {
+                return Ordinal.Compare(x, y);
+            }
+        }
+
+        public override bool Equals(string x, string y)
+        {
+            return Ordinal.Equals(x, y);
+        }
+
+        public override int GetHashCode(string obj)
+        {
+            return Ordinal.GetHashCode(obj);
         }
     }
 }

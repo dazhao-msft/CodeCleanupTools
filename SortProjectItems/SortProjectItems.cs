@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -52,7 +51,7 @@ public static class Program
 
         foreach (XElement propertyGroup in propertyGroups)
         {
-            SortPropertyGroup(propertyGroup);
+            SortPropertyGroup(propertyGroup, filePath);
         }
 
         var originalBytes = File.ReadAllBytes(filePath);
@@ -71,7 +70,7 @@ public static class Program
         }
     }
 
-    private static void SortPropertyGroup(XElement propertyGroup)
+    private static void SortPropertyGroup(XElement propertyGroup, string filePath)
     {
         var original = propertyGroup.Elements().ToArray();
         var sorted = original
@@ -81,6 +80,71 @@ public static class Program
         for (int i = 0; i < original.Length; i++)
         {
             original[i].ReplaceWith(sorted[i]);
+        }
+
+        // Check property consistency
+
+        // 1. <TargetFramework, RuntimeIdentifier>
+        if (original.Any(p => p.Name.LocalName == "TargetFramework" && p.Value == "$(BizQAHostTargetFramework)"))
+        {
+            if (!original.Any(q => q.Name.LocalName == "RuntimeIdentifier" && q.Value == "$(BizQAHostRuntimeIdentifier)"))
+            {
+                Console.WriteLine($"TargetFramework & RuntimeIdentifier don't match in {filePath}.");
+            }
+        }
+
+        if (original.Any(p => p.Name.LocalName == "RuntimeIdentifier" && p.Value == "$(BizQAHostRuntimeIdentifier)"))
+        {
+            if (!original.Any(q => q.Name.LocalName == "TargetFramework" && q.Value == "$(BizQAHostTargetFramework)"))
+            {
+                Console.WriteLine($"TargetFramework & RuntimeIdentifier don't match in {filePath}.");
+            }
+        }
+
+        // 2. <TargetFramework, OutputType>
+        if (original.Any(p => p.Name.LocalName == "TargetFramework" && p.Value == "$(BizQAHostTargetFramework)"))
+        {
+            if (!original.Any(q => q.Name.LocalName == "OutputType" && q.Value == "Exe"))
+            {
+                Console.WriteLine($"TargetFramework & OutputType don't match in {filePath}.");
+            }
+        }
+
+        if (original.Any(p => p.Name.LocalName == "OutputType" && p.Value == "Exe"))
+        {
+            if (!original.Any(q => q.Name.LocalName == "TargetFramework" && q.Value == "$(BizQAHostTargetFramework)"))
+            {
+                Console.WriteLine($"TargetFramework & OutputType don't match in {filePath}.");
+            }
+        }
+
+        // 3. <TargetFramework, IsTestProject>
+        if (original.Any(p => p.Name.LocalName == "TargetFramework" && p.Value == "$(BizQATestTargetFramework)"))
+        {
+            if (!original.Any(q => q.Name.LocalName == "IsTestProject" && q.Value == "true"))
+            {
+                Console.WriteLine($"TargetFramework & IsTestProject don't match in {filePath}.");
+            }
+        }
+
+        if (original.Any(p => p.Name.LocalName == "IsTestProject" && p.Value == "true"))
+        {
+            if (!original.Any(q => q.Name.LocalName == "TargetFramework" && q.Value == "$(BizQATestTargetFramework)"))
+            {
+                Console.WriteLine($"TargetFramework & IsTestProject don't match in {filePath}.");
+            }
+        }
+
+        // 4. AssemblyName
+        if (!original.Any(p => p.Name.LocalName == "AssemblyName"))
+        {
+            Console.WriteLine($"AssemblyName doesn't exist in {filePath}.");
+        }
+
+        // 5. RootNamespace
+        if (!original.Any(p => p.Name.LocalName == "RootNamespace"))
+        {
+            Console.WriteLine($"RootNamespace doesn't exist in {filePath}.");
         }
     }
 
@@ -285,7 +349,6 @@ public static class Program
             { "IsPackable", 5 },
             { "IsTestProject", 6 },
         };
-
 
         public override int Compare(string x, string y)
         {

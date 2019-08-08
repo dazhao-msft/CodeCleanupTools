@@ -5,44 +5,29 @@ using System.Linq;
 using System.Text;
 using System.Xml.Linq;
 
-class Program
+public static class Program
 {
-    static int Main(string[] args)
+    public static int Main(string[] args)
     {
-        if (args.Length > 1)
+        if (args.Length != 1)
         {
             PrintHelp();
             return -1;
         }
 
-        if (args.Any(a => a == "/?" || a == "-h" || a == "help"))
+        string rootDirectory = args[0];
+
+        if (!Directory.Exists(rootDirectory))
         {
             PrintHelp();
-            return 0;
+            return -1;
         }
 
-        if (args.Length == 0 || args.Length == 1 && args[0] == "/r")
-        {
-            var searchOption = args.Length == 0 ? SearchOption.TopDirectoryOnly : SearchOption.AllDirectories;
+        var files = Directory.GetFiles(rootDirectory, "*.csproj", SearchOption.AllDirectories);
 
-            var files = Directory.GetFiles(Environment.CurrentDirectory, "*.csproj", searchOption)
-                .Concat(Directory.GetFiles(Environment.CurrentDirectory, "*.vbproj", searchOption));
-            foreach (var file in files)
-            {
-                SortProjectItems(file);
-            }
-        }
-        else
+        foreach (var file in files)
         {
-            if (File.Exists(args[0]))
-            {
-                SortProjectItems(args[0]);
-            }
-            else
-            {
-                Console.WriteLine("File not found: " + args[0]);
-                return -1;
-            }
+            SortProjectItems(file);
         }
 
         return 0;
@@ -50,17 +35,11 @@ class Program
 
     private static void PrintHelp()
     {
-        Console.WriteLine(@"Usage: SortProjectItems.exe [<project file>|/r]
-       Sorts the ItemGroup contents of an MSBuild project file alphabetically.
-       If the project file is not specified sorts all files in the current
-       directory.
-
-SortProjectItems.exe /r
-       Recursively sorts all *.csproj && *.vbproj files in the current directory and all
-       subdirectories.");
+        Console.WriteLine(@"Usage: SortProjectItems.exe [<path-to-root-directory-of-csproj-files>]
+       Sorts the ItemGroup contents of an MSBuild project file alphabetically.");
     }
 
-    static void SortProjectItems(string filePath)
+    private static void SortProjectItems(string filePath)
     {
         XDocument document = XDocument.Load(filePath, LoadOptions.PreserveWhitespace | LoadOptions.SetLineInfo);
         XNamespace msBuildNamespace = document.Root.GetDefaultNamespace();
@@ -238,7 +217,7 @@ SortProjectItems.exe /r
         var original = itemGroup.Elements().ToArray();
         var sorted = original
             .OrderBy(i => i.Name.LocalName)
-            .ThenBy(i => (i.Attribute("Include") ?? i.Attribute("Remove")).Value)
+            .ThenBy(i => (i.Attribute("Include") ?? i.Attribute("Update") ?? i.Attribute("Remove")).Value)
             .ToArray();
 
         for (int i = 0; i < original.Length; i++)

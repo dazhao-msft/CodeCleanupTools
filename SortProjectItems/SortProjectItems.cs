@@ -343,11 +343,12 @@ public static class Program
         {
             { "TargetFramework", 0 },
             { "RuntimeIdentifier", 1 },
-            { "OutputType", 2 },
-            { "AssemblyName", 3 },
-            { "RootNamespace", 4 },
-            { "IsPackable", 5 },
-            { "IsTestProject", 6 },
+            { "TargetLatestRuntimePatch", 2 },
+            { "OutputType", 3 },
+            { "AssemblyName", 4 },
+            { "RootNamespace", 5 },
+            { "IsPackable", 6 },
+            { "IsTestProject", 7 },
         };
 
         public override int Compare(string x, string y)

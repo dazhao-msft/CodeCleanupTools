@@ -118,7 +118,16 @@ public static class Program
             }
         }
 
-        // 3. <TargetFramework, IsTestProject>
+        // 3. <TargetFramework, CopyLocalLockFileAssemblies>
+        if (original.Any(p => p.Name.LocalName == "TargetFramework" && p.Value == "$(BizQAHostTargetFramework)"))
+        {
+            if (!original.Any(q => q.Name.LocalName == "CopyLocalLockFileAssemblies" && q.Value == "true"))
+            {
+                Console.WriteLine($"TargetFramework & CopyLocalLockFileAssemblies don't match in {filePath}.");
+            }
+        }
+
+        // 4. <TargetFramework, IsTestProject>
         if (original.Any(p => p.Name.LocalName == "TargetFramework" && p.Value == "$(BizQATestTargetFramework)"))
         {
             if (!original.Any(q => q.Name.LocalName == "IsTestProject" && q.Value == "true"))
@@ -344,11 +353,12 @@ public static class Program
             { "TargetFramework", 0 },
             { "RuntimeIdentifier", 1 },
             { "TargetLatestRuntimePatch", 2 },
-            { "OutputType", 3 },
-            { "AssemblyName", 4 },
-            { "RootNamespace", 5 },
-            { "IsPackable", 6 },
-            { "IsTestProject", 7 },
+            { "CopyLocalLockFileAssemblies", 3 },
+            { "OutputType", 4 },
+            { "AssemblyName", 5 },
+            { "RootNamespace", 6 },
+            { "IsPackable", 7 },
+            { "IsTestProject", 8 },
         };
 
         public override int Compare(string x, string y)

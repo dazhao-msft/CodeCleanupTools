@@ -84,7 +84,7 @@ public static class Program
 
         // Check property consistency
 
-        // 1. <TargetFramework, RuntimeIdentifier>
+        // <TargetFramework, RuntimeIdentifier>
         if (original.Any(p => p.Name.LocalName == "TargetFramework" && p.Value == "$(BizQAHostTargetFramework)"))
         {
             if (!original.Any(q => q.Name.LocalName == "RuntimeIdentifier" && q.Value == "$(BizQAHostRuntimeIdentifier)"))
@@ -101,7 +101,7 @@ public static class Program
             }
         }
 
-        // 2. <TargetFramework, OutputType>
+        // <TargetFramework, OutputType>
         if (original.Any(p => p.Name.LocalName == "TargetFramework" && p.Value == "$(BizQAHostTargetFramework)"))
         {
             if (!original.Any(q => q.Name.LocalName == "OutputType" && q.Value == "Exe"))
@@ -118,7 +118,16 @@ public static class Program
             }
         }
 
-        // 3. <TargetFramework, CopyLocalLockFileAssemblies>
+        // <TargetFramework, TargetLatestRuntimePatch>
+        if (original.Any(p => p.Name.LocalName == "TargetFramework" && p.Value == "$(BizQAHostTargetFramework)"))
+        {
+            if (!original.Any(q => q.Name.LocalName == "TargetLatestRuntimePatch" && q.Value == "true"))
+            {
+                Console.WriteLine($"TargetFramework & TargetLatestRuntimePatch don't match in {filePath}.");
+            }
+        }
+
+        // <TargetFramework, CopyLocalLockFileAssemblies>
         if (original.Any(p => p.Name.LocalName == "TargetFramework" && p.Value == "$(BizQAHostTargetFramework)"))
         {
             if (!original.Any(q => q.Name.LocalName == "CopyLocalLockFileAssemblies" && q.Value == "true"))
@@ -127,7 +136,7 @@ public static class Program
             }
         }
 
-        // 4. <TargetFramework, IsTestProject>
+        // <TargetFramework, IsTestProject>
         if (original.Any(p => p.Name.LocalName == "TargetFramework" && p.Value == "$(BizQATestTargetFramework)"))
         {
             if (!original.Any(q => q.Name.LocalName == "IsTestProject" && q.Value == "true"))
@@ -144,13 +153,13 @@ public static class Program
             }
         }
 
-        // 4. AssemblyName
+        // AssemblyName
         if (!original.Any(p => p.Name.LocalName == "AssemblyName"))
         {
             Console.WriteLine($"AssemblyName doesn't exist in {filePath}.");
         }
 
-        // 5. RootNamespace
+        // RootNamespace
         if (!original.Any(p => p.Name.LocalName == "RootNamespace"))
         {
             Console.WriteLine($"RootNamespace doesn't exist in {filePath}.");

@@ -137,15 +137,17 @@ public static class Program
         }
 
         // <TargetFramework, IsTestProject>
+        bool isTestProject = filePath.EndsWith(".Tests.csproj", StringComparison.OrdinalIgnoreCase);
+
         if (original.Any(p => p.Name.LocalName == "TargetFramework" && p.Value == "$(BizQATestTargetFramework)"))
         {
-            if (!original.Any(q => q.Name.LocalName == "IsTestProject" && q.Value == "true"))
+            if (!isTestProject)
             {
                 Console.WriteLine($"TargetFramework & IsTestProject don't match in {filePath}.");
             }
         }
 
-        if (original.Any(p => p.Name.LocalName == "IsTestProject" && p.Value == "true"))
+        if (isTestProject)
         {
             if (!original.Any(q => q.Name.LocalName == "TargetFramework" && q.Value == "$(BizQATestTargetFramework)"))
             {

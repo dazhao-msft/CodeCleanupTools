@@ -136,25 +136,6 @@ public static class Program
             }
         }
 
-        // <TargetFramework, IsTestProject>
-        bool isTestProject = filePath.EndsWith(".Tests.csproj", StringComparison.OrdinalIgnoreCase);
-
-        if (original.Any(p => p.Name.LocalName == "TargetFramework" && p.Value == "$(BizQATestTargetFramework)"))
-        {
-            if (!isTestProject)
-            {
-                Console.WriteLine($"TargetFramework & IsTestProject don't match in {filePath}.");
-            }
-        }
-
-        if (isTestProject)
-        {
-            if (!original.Any(q => q.Name.LocalName == "TargetFramework" && q.Value == "$(BizQATestTargetFramework)"))
-            {
-                Console.WriteLine($"TargetFramework & IsTestProject don't match in {filePath}.");
-            }
-        }
-
         // AssemblyName
         if (!original.Any(p => p.Name.LocalName == "AssemblyName"))
         {
@@ -369,7 +350,6 @@ public static class Program
             { "AssemblyName", 5 },
             { "RootNamespace", 6 },
             { "IsPackable", 7 },
-            { "IsTestProject", 8 },
         };
 
         public override int Compare(string x, string y)

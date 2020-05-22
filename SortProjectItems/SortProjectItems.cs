@@ -118,24 +118,6 @@ public static class Program
             }
         }
 
-        // <TargetFramework, TargetLatestRuntimePatch>
-        if (original.Any(p => p.Name.LocalName == "TargetFramework" && p.Value == "$(BizQAHostTargetFramework)"))
-        {
-            if (!original.Any(q => q.Name.LocalName == "TargetLatestRuntimePatch" && q.Value == "true"))
-            {
-                Console.WriteLine($"TargetFramework & TargetLatestRuntimePatch don't match in {filePath}.");
-            }
-        }
-
-        // <TargetFramework, CopyLocalLockFileAssemblies>
-        if (original.Any(p => p.Name.LocalName == "TargetFramework" && p.Value == "$(BizQAHostTargetFramework)"))
-        {
-            if (!original.Any(q => q.Name.LocalName == "CopyLocalLockFileAssemblies" && q.Value == "true"))
-            {
-                Console.WriteLine($"TargetFramework & CopyLocalLockFileAssemblies don't match in {filePath}.");
-            }
-        }
-
         // AssemblyName
         if (!original.Any(p => p.Name.LocalName == "AssemblyName"))
         {

@@ -1,6 +1,6 @@
-﻿using System.Linq;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using System.Linq;
 
 public class RemoveConsecutiveEmptyLinesWorker
 {

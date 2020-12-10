@@ -1,10 +1,10 @@
-using System;
-using System.IO;
-using System.Linq;
 using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Formatting;
 using Microsoft.CodeAnalysis.MSBuild;
+using System;
+using System.IO;
+using System.Linq;
 
 class FormatSolution
 {

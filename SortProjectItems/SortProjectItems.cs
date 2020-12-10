@@ -87,17 +87,19 @@ public static class Program
         // <TargetFramework, RuntimeIdentifier>
         if (original.Any(p => p.Name.LocalName == "TargetFramework" && p.Value == "$(BizQAHostTargetFramework)"))
         {
-            if (!original.Any(q => q.Name.LocalName == "RuntimeIdentifier" && q.Value == "$(BizQAHostRuntimeIdentifier)"))
+            if (!original.Any(q => q.Name.LocalName == "RuntimeIdentifier" && q.Value == "$(BizQAHostRuntimeIdentifier)") &&
+                !original.Any(q => q.Name.LocalName == "RuntimeIdentifiers" && q.Value.Contains("$(BizQAHostRuntimeIdentifier)")))
             {
-                Console.WriteLine($"TargetFramework & RuntimeIdentifier don't match in {filePath}.");
+                Console.WriteLine($"TargetFramework & RuntimeIdentifier|RuntimeIdentifiers don't match in {filePath}.");
             }
         }
 
-        if (original.Any(p => p.Name.LocalName == "RuntimeIdentifier" && p.Value == "$(BizQAHostRuntimeIdentifier)"))
+        if (original.Any(p => p.Name.LocalName == "RuntimeIdentifier" && p.Value == "$(BizQAHostRuntimeIdentifier)") ||
+            original.Any(q => q.Name.LocalName == "RuntimeIdentifiers" && q.Value.Contains("$(BizQAHostRuntimeIdentifier)")))
         {
             if (!original.Any(q => q.Name.LocalName == "TargetFramework" && q.Value == "$(BizQAHostTargetFramework)"))
             {
-                Console.WriteLine($"TargetFramework & RuntimeIdentifier don't match in {filePath}.");
+                Console.WriteLine($"TargetFramework & RuntimeIdentifier|RuntimeIdentifiers don't match in {filePath}.");
             }
         }
 
@@ -325,7 +327,9 @@ public static class Program
         private static readonly Dictionary<string, int> SpecialPropertyNames = new Dictionary<string, int>()
         {
             { "TargetFramework", 0 },
+            { "TargetFrameworks", 0 },
             { "RuntimeIdentifier", 1 },
+            { "RuntimeIdentifiers", 1 },
             { "TargetLatestRuntimePatch", 2 },
             { "CopyLocalLockFileAssemblies", 3 },
             { "OutputType", 4 },
